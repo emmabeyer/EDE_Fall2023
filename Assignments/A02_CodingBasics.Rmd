@@ -32,15 +32,20 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 
 ```{r basics 1}
 #1. 
-seq(1, 30, 3) #sequence from 1 to 30 increasing by 3
-A02_sequence_1to30 <- seq(1, 30, 3) #assigning name to sequence
+seq(1, 30, 3) 
+#sequence from 1 to 30 increasing by 3
+A02_sequence_1to30 <- seq(1, 30, 3) 
+#assigning name to sequence
 
 #2. 
-mean(A02_sequence_1to30) #mean of sequence
-median(A02_sequence_1to30) #median of sequence
+mean(A02_sequence_1to30) 
+#mean of sequence
+median(A02_sequence_1to30) 
+#median of sequence
 
 #3. 
-mean(A02_sequence_1to30) > median(A02_sequence_1to30) #determines if mean is greater than median
+mean(A02_sequence_1to30) > median(A02_sequence_1to30) 
+#determines if mean is greater than median
 
 ```
 
@@ -55,12 +60,16 @@ mean(A02_sequence_1to30) > median(A02_sequence_1to30) #determines if mean is gre
 8.  Label the columns of your data frame with informative titles.
 
 ```{r basics 2}
-names_of_students <- c("Harry", "Ron", "Hermione", "Neville", "Luna", "Draco") #vector of student names
-test_scores <- c(70, 50, 100, 60, 80, 40) #vector of test scores from students
-passing_grade <- test_scores > 50 #determines if test scores are above 50
+names_of_students <- c("Harry", "Ron", "Hermione", "Neville") 
+#vector of student names
+test_scores <- c(70, 40, 100, 60) 
+#vector of test scores from students
+passing_grade <- test_scores > 50 
+#determines if test scores are above 50
 
-student_grades_df <- data.frame("Student_Names"=names_of_students, "Test_Scores"=test_scores, "Passing_Grade"=passing_grade) #
-student_grades_df #creating a data frame with students, grades, and their passing grades
+student_grades_df <- data.frame("Student_Names"=names_of_students, "Test_Scores"=test_scores, "Passing_Grade"=passing_grade) 
+student_grades_df 
+#creating a data frame with students, grades, and their passing grades
 
 ```
 
@@ -73,9 +82,19 @@ student_grades_df #creating a data frame with students, grades, and their passin
 11. Apply your function to the vector with test scores that you created in number 5.
 
 ```{r basics 3}
+student_test_scores <- function(test_scores) {
+ifelse(test_scores>50, "TRUE", "FALSE") 
 
-```
+}
+#creating a function where if test_scores is >50 then its true and <50 false
+
+ifelse_test_scores <- student_test_scores(test_scores); ifelse_test_scores
+#testing to see if students had passing scores using ifelse function
+
+
+
+``` 
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer:
+> Answer:The ifelse function worked because I wanted to evaulate the whole vector (test_scores), and not just a single condition. If and else statements are better when I just want to evaluate one condition, and cannot evaluate a whole vector in one operation.
