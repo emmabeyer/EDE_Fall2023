@@ -252,6 +252,12 @@ write.csv(USGS.flow.data, file = "./Data/Processed/USGS_Site02085000_Flow_Proces
 
 * In the Knit menu in the Editor, you will need to specify whether your knit directory should be the document directory or the project directory. If your document is not knitting correctly, try switching between the document directory and project directory as a first troubleshooting option.
 
+Avoid install.package() and View () and commands that produce long outputs. 
+Restart your R session and run code from start to finish. Ensure all packages are installed, objects are created in code itself.
+Check WD and relative paths.
+Tidy R code w/ breaks so they don't extend off the page.
+Make sure cluncks don't have any symbols or characters. Just stick to works
+
 ### Spreadsheets
 
 *Files should be saved as .csv or .txt for easy import into R. Note that complex formatting, including formulas in Excel, are not saved when spreadsheets are converted to comma separated or text formats (i.e., values alone are saved).
