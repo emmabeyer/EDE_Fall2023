@@ -76,7 +76,7 @@ NTL.phys.data.JunethruOctober <- filter(NTL.phys.data, daynum %in% c(152:304))
 # filter NTL.phys.data for the year 1999
 # what code do you need to use, based on the class of the variable?
 summary(NTL.phys.data$year4)
-NTL.phys.data.1999 <- filter(NTL.phys.data, year4 == 1999)
+ex1 <- filter(NTL.phys.data, year4 == 1999)
 
 # Exercise 2: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
@@ -125,11 +125,9 @@ ex3 <-
 # filter for depth==0). Make sure you eliminate NAs before computing the means.
 ex4 <-
   ex3 %>%
-  filter(depth == 0)
-  
-summary(ex4$temperature_C)  
-summarize()
-  
+  filter(depth == 0) %>%
+  summarize(mean_T = mean(temperature_C))
+
 ```
 
 ## Gather and Spread
@@ -141,9 +139,20 @@ For gather we will use `pivot_longer` and for spread we will use `pivot_wider`.
 #  on the deck of the sampling boat) into one column using pivot_longer. Name
 #  the new column holding the irradiance type as "Irradiance_Type", and name the
 #  new column holding the irradiance values as "Irradiance_Value".
-
+ex5 <- NTL.phys.data %>%
+  pivot_longer(
+    cols = c(irradianceWater,irradianceDeck),
+    names_to = "Irradiance_Type",
+    values_to = "Irradiance_Value"
+  )
 
 #Exercise 6: Spread temperatureC into more than one column based on the depth.
+ex6 <- NTL.phys.data %>%
+  select(lakename,sampledate,depth,temperature_C) %>%
+  pivot_wider(
+    names_from = depth,
+    values_from = temperature_C
+  )
 
 ```
 
