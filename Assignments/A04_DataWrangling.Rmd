@@ -1,6 +1,6 @@
 ---
-title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+title: "EmmaBeyer_A04_DataWrangling.Rmd"
+author: "Emma Beyer"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -32,13 +32,46 @@ The completed exercise is due on Thursday, Sept 28th @ 5:00pm.
 
 ```{r setup, message = FALSE}
 #1a 
+#install tidyverse package
+library(tidyverse)
+#install lubridate package
+library(lubridate)
+#install here package
+library(here)
 
 #1b 
+#checking working directory
+getwd()
+#setting working directory to EDA_Fall2023 (had to do this in console)
+setwd("/home/guest/EDA/EDE_Fall2023")
 
 #1c 
+#reading O3 NC2018 dataset
+O3_NC2018_dataset <-  read.csv(
+  file=here("Data/Raw/EPAair_O3_NC2018_raw.csv"), 
+  stringsAsFactors = TRUE)
+#reading O3 NC2019 dataset
+O3_NC2019_dataset <-  read.csv(
+  file=here("Data/Raw/EPAair_O3_NC2019_raw.csv"), 
+  stringsAsFactors = TRUE)
+#reading PM25 NC2018 dataset
+PM25_NC2018_dataset <-  read.csv(
+  file=here("Data/Raw/EPAair_PM25_NC2018_raw.csv"), 
+  stringsAsFactors = TRUE)
+#reading PM25 NC2018 dataset
+PM25_NC2019_dataset <-  read.csv(
+  file=here("Data/Raw/EPAair_PM25_NC2019_raw.csv"), 
+  stringsAsFactors = TRUE)
 
 #2 
-
+#glimpse of O3_NC2018_dataset
+glimpse(O3_NC2018_dataset)
+#glimpse of O3_NC2019_dataset
+glimpse(O3_NC2019_dataset)
+#glimpse of PM25_NC2018_dataset
+glimpse(PM25_NC2018_dataset)
+#glimpse of PM25_NC2019_dataset
+glimpse(PM25_NC2019_dataset)
 ```
 
 
@@ -52,14 +85,42 @@ The completed exercise is due on Thursday, Sept 28th @ 5:00pm.
 
 6. Save all four processed datasets in the Processed folder. Use the same file names as the raw files but replace "raw" with "processed".
 
-```{r}
+```{r wrangling datasets}
 #3
+#change to date objects for all four datasets
+O3_NC2018_dataset$Date <- mdy(O3_NC2018_dataset$Date)
+
+O3_NC2019_dataset$Date <- mdy(O3_NC2019_dataset$Date)
+
+PM25_NC2018_dataset$Date <- mdy(PM25_NC2018_dataset$Date)
+
+PM25_NC2019_dataset$Date <- mdy(PM25_NC2019_dataset$Date)
 
 #4
+#change all datasets to include chosen columns
+O3_NC2018_dataset4 <- O3_NC2018_dataset %>% select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+O3_NC2019_dataset4 <- O3_NC2019_dataset %>% select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+PM25_NC2018_dataset4 <- PM25_NC2018_dataset %>% select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+PM25_NC2019_dataset4 <- PM25_NC2019_dataset %>% select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
+#changing the values of AQS_PARAMETER_DES to PM2.5
+PM25_NC2018_dataset4 <- mutate(PM25_NC2018_dataset4, AQS_PARAMETER_DESC = "PM2.5")
+
+PM25_NC2019_dataset4 <- mutate(PM25_NC2019_dataset4, AQS_PARAMETER_DESC = "PM2.5")
 
 #6
+#saving processed data as new csv files
+write.csv(O3_NC2018_dataset4, row.names = FALSE, file = "./Data/Processed/EPAair_O3_NC2018_processed.csv")
+
+write.csv(O3_NC2019_dataset4, row.names = FALSE, file = "./Data/Processed/EPAair_O3_NC2019_processed.csv")
+
+write.csv(PM25_NC2018_dataset4, row.names = FALSE, file = "./Data/Processed/EPAair_PM25_NC2018_processed.csv")
+
+write.csv(PM25_NC2019_dataset4, row.names = FALSE, file = "./Data/Processed/EPAair_PM25_NC2019_processed.csv")
 
 ```
 
@@ -84,16 +145,40 @@ The completed exercise is due on Thursday, Sept 28th @ 5:00pm.
 
 11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1819_Processed.csv"
 
-```{r}
+```{r combining datasets}
 #7 
+#using rbind to combine all four datasets above into one
+NC_airquality <- rbind(O3_NC2018_dataset4, O3_NC2019_dataset4, PM25_NC2018_dataset4, PM25_NC2019_dataset4)
 
 #8 
+#wrangling new dataset with piplines
+NC_airquality8 <- NC_airquality %>%
+  #chose site names
+  filter(NC_airquality, Site.Name %in% c("Linville Falls", "Durham Armory", "Leggett", "Hattie Avenue", "Clemmons Middle", "Mendenhall School", "Frying Pan Mountain", "West Johnston Co.", "Garinger High School", "Castle Hayne", "Pitt Agri. Center", "Bryson City", "Millbrook School")) %>%
+  #split-apply-combine
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
+  filter(!is.na(DAILY_AQI_VALUE) & !is.na(SITE_LATITTUDE) & !is.na(SITE_LONGITUDE)) %>%
+  #ASK FOR HELP HERE
+  summarise(meanAQI = mean(DAILY_AQI_VALUE), 
+            meanLAT = mean(SITE_LATITTUDE), 
+            meanLONG = mean(SITE_LONGITUDE))
 
-#9
+#creating a month column
+NC_airquality8 <- mutate(NC_airquality8, Month = month(Date)) 
+#creating a year column
+NC_airquality8 <- mutate(NC_airquality8, Year = year(Date)) 
+
+#9 ???? not sure how this works
+
+NC_airquality9 <- pivot_wider(NC_airquality8, names_from = AQS_PARAMETER_DESC, values_from = Ozone)
 
 #10
+#dimensions of spread dataset
+dim(NC_airquality9)
 
 #11
+#saving processed data
+write.csv(NC_airquality9, row.names = FALSE, file = "./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
 
 ```
 
@@ -104,13 +189,22 @@ The completed exercise is due on Thursday, Sept 28th @ 5:00pm.
 
 13. Call up the dimensions of the summary dataset.
 
-```{r}
+```{r summary tables}
 
 #12
+#split-apply_combine 
+NC_airquality_summaries <- 
+  NC_airquality9 %>%
+  group_by(Site.Name, Month, Year) %>%
+  filter(!is.na(name_of_ozone_column) & !is.na(name_of_PM2.5_column) & !is.na(tp_ug)) %>%
+  summarise(mean_ozone = mean(name_of_ozone_column), 
+            mean_PM2.5 = mean(name_of_PM2.5_column)) 
+#pipe to remove ozone values
 
-
+            
 #13
-
+#dimensions of NC_airquality_summaries
+dim(NC_airquality_summaries)
 
 ```
 
