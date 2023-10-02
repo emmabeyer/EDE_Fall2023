@@ -44,21 +44,25 @@ O3plot1 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   theme_gray()
 print(O3plot1)
+# exactly the same as above
 
 O3plot2 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   theme_bw()
 print(O3plot2)
+# adds darker lines
 
 O3plot3 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   theme_light()
 print(O3plot3)
+# dark items but still light background
 
 O3plot4 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   theme_classic()
 print(O3plot4)
+# no grid lines, close to the default
 ```
 
 Notice that some aspects of your graph have not been adjusted, including: 
@@ -73,6 +77,7 @@ If you would like to set a common theme across all plots in your analysis sessio
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
         legend.position = "top") #alternative: legend.position + legend.justification
+# assigning a theme. 'base_size' increasing font size of labels. Changing axis text to black. Positioning legend (default is on the right)
 
 # options: call the theme in each plot or set the theme at the start. 
 
@@ -80,12 +85,14 @@ O3plot5 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   mytheme
 print(O3plot5)  
+# specifying theme for plot using defined theme above
 
 theme_set(mytheme)
 
 O3plot6 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
 print(O3plot6)  
+# sets the theme as default
 
 ```
 
@@ -105,7 +112,13 @@ O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
     date_breaks = "2 months", date_labels = "%b %y") +
   ylab(expression("O"[3]* " AQI Value")) +
   theme(axis.text.x = element_text(angle = 45,  hjust = 1))
-print(O3plot7)  
+print(O3plot7) 
+# hline adds horizontal line
+# alpha changes the transparency and size
+# geom_text adds text to plot. 'hjust =' horizonal justification, 1 means left aligning, fontface adds type of text (bold)
+# this defines different levels on graph to clarify data
+# limits specify ranges of the data
+# ylab creates label on the y axis
 
 ```
 
@@ -162,7 +175,7 @@ library(colormap)
 scales::show_col(colormap(colormap = colormaps$viridis, nshades = 16))
 scales::show_col(colormap(colormap = colormaps$inferno, nshades = 16))
 scales::show_col(colormap(colormap = colormaps$magma, nshades = 16))
-display.brewer.all(n = 9)
+display.brewer.all(n = 9) # names of palettes you can use
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
@@ -175,7 +188,7 @@ print(NvsP)
 NvsP2 <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
   geom_point(alpha = 0.7, size = 2.5) +
-  #labs() + # change your legend labels here
+  labs(color="Depth", shape="Lake name") + # change your legend labels here
   scale_shape_manual(values = c(15, 17)) +
   #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
   scale_color_viridis(option = "magma", direction = -1) +
@@ -209,6 +222,7 @@ A useful guide for aligning plots by axis can be found here: https://wilkelab.or
 #install.packages("cowplot")
 library(cowplot)
 plot_grid(NvsP2, Nutrientplot, nrow = 2, align = 'h', rel_heights = c(1.25, 1))
+# rel_heights sizes plot on the same grid
 
 ```
 

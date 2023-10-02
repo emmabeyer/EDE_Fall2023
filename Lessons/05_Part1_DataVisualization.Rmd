@@ -16,6 +16,8 @@ editor_options:
 ## Opening discussion
 Effective data visualization depends on purposeful choices about graph types. The ideal graph type depends on the type of data and the message the visualizer desires to communicate. The best visualizations are clear and simple. A good resource for data visualization is [Data to Viz](https://www.data-to-viz.com/), which includes both a decision tree for visualization types and explanation pages for each type of data, including links to R resources to create them. Take a few minutes to explore this website.
 
+USE ABOVE LINK TO DECIDE WHAT PLOT TO USE FOR MY DATA
+
 ## Set Up
 
 ```{r, message = FALSE, warning = FALSE}
@@ -41,6 +43,7 @@ PeterPaul.chem.nutrients.gathered$sampledate <- ymd(PeterPaul.chem.nutrients.gat
 ggplot, called from the package `ggplot2`, is a graphing and image generation tool in R. This package is part of tidyverse. While base R has graphing capabilities, ggplot has the capacity for a wider range and more sophisticated options for graphing. 
 ggplot has only a few rules: 
 
+RULES for 'ggplot'
 * The first line of ggplot code always starts with `ggplot()`
 * A data frame must be specified within the `ggplot()` function. Additional datasets can be specified in subsequent layers.
 * Aesthetics must be specified, most commonly x and y variables but including others. Aesthetics can be specified in the `ggplot()` function or in subsequent layers.
@@ -57,12 +60,12 @@ Here are some commonly used layers for plotting in ggplot:
 * geom_violin
 * geom_dotplot
 * geom_density_ridges
-* geom_point
+* geom_point (scatterplot)
 * geom_errorbar
 * geom_smooth
 * geom_line
 * geom_area
-* geom_abline (plus geom_hline and geom_vline)
+* geom_abline (plus geom_hline (horizonal line) and geom_vline(vertical line))
 * geom_text
 
 ### Aesthetics
@@ -77,6 +80,7 @@ Here are some commonly used aesthetic types that can be manipulated in ggplot:
 ### Plotting continuous variables over time: Scatterplot and Line Plot
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+# above the fig.height etc is setting the bounds for our plots. This will apply to all the plot be/c its in the top clunk code
 # Scatterplot
 ggplot(EPAair, aes(x = Date, y = Ozone)) + 
   geom_point()
@@ -84,11 +88,14 @@ ggplot(EPAair, aes(x = Date, y = Ozone)) +
 O3plot <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
 print(O3plot)
+#same plots, but want us to create object instead of above 
 
 # Fix this code
 O3plot2 <- ggplot(EPAair) +
-  geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  #geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  geom_point(aes(x = Date, y = Ozone), color = "blue"))
 print(O3plot2)
+#need to have the color function outside of the aesthetics or else it won't work
 
 # Add additional variables
 # How could you automatically assign a marker color to a variable? 
@@ -96,6 +103,8 @@ PMplot <-
   ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year), color = Site.Name)) +
   geom_point()
 print(PMplot)
+# 'shape = as.factor(Year)' automatically assigns a shape to each year
+# 'color = Site.Name' will automatically assign a different color to each site name and create a legend (since it was included in aes)
 
 # Separate plot with facets
 PMplot.faceted <-
@@ -103,6 +112,8 @@ PMplot.faceted <-
   geom_point() +
   facet_wrap(vars(Site.Name), nrow = 3)
 print(PMplot.faceted)
+#replacing 'color =' with geom_point and facet_wrap
+#separates each site, but lose color
 
 # Filter dataset within plot building and facet by multiple variables
 PMplot.faceted2 <- 
@@ -112,6 +123,7 @@ PMplot.faceted2 <-
   geom_point() +
   facet_grid(Site.Name ~ Year) 
 print(PMplot.faceted2)
+#selecting the sites you want using the subset function and separating the years with facet_grid function
 
 # Plot true time series with geom_line
 PMplot.line <- 
@@ -119,7 +131,7 @@ PMplot.line <-
          aes(x = Date, y = PM2.5)) +
   geom_line()
 print(PMplot.line)
-
+#example of a time series plot (will see this more in later lesson)
 
 ```
 
@@ -132,6 +144,7 @@ lightvsDO <-
   ggplot(PeterPaul.chem.nutrients, aes(x = irradianceWater, y = dissolvedOxygen)) +
   geom_point()
 print(lightvsDO)
+#not a good representation of the data be/c of outliers
 
 # Adjust axes
 lightvsDOfixed <- 
@@ -140,6 +153,7 @@ lightvsDOfixed <-
   xlim(0, 250) +
   ylim(0, 20)
 print(lightvsDOfixed)
+# excludes outliers and zooms in on most relevant data
 
 # Depth in the fields of limnology and oceanography is on a reverse scale
 tempvsdepth <- 
@@ -148,6 +162,7 @@ tempvsdepth <-
   geom_point() +
   scale_y_reverse()
 print(tempvsdepth)
+#'scale_y_reverse' puts the 0 at the top of the graph instead of the bottom. This is good for depth graphs
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
@@ -155,6 +170,8 @@ NvsP <-
   geom_smooth(method = lm) +
   geom_abline(aes(slope = 16, intercept = 0))
 print(NvsP)
+# 'geom_smooth' adds trend line be/w two nutrients
+# 'geom_abline' adding our own line with a slope of 16
 
 ```
 
@@ -164,24 +181,30 @@ A traditional way to display summary statistics of continuous variables is a bar
 What might be more effective ways to display the information? Navigate to the boxplots page in the Caveats section to explore further.
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+# These are better to display summary stats than bar plot w/ error bars
 # Box and whiskers plot
 Nutrientplot3 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
-  geom_boxplot(aes(color = nutrient)) # Why didn't we use "fill"?
+  geom_boxplot(aes(color = nutrient)) # Why didn't we use "fill"? Fill will keep the contore dots black, while color adds the color to the dots as well as box plot
 print(Nutrientplot3)
 
 # Dot plot
 Nutrientplot4 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
   geom_dotplot(aes(color = nutrient, fill = nutrient), binaxis = "y", binwidth = 1, 
-               stackdir = "center", position = "dodge", dotsize = 2) #
+               stackdir = "center", position = "dodge", dotsize = 2) 
 print(Nutrientplot4)
+# now can see the average values better than box plot
+# 'biaxis = "y"' means stack bins over y axis
+# stackdir stacks the dots in the center
+# dodge stacks values with the same value next to each other (wider in graph)
 
 # Violin plot
 Nutrientplot5 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
   geom_violin(aes(color = nutrient)) #
 print(Nutrientplot5)
+# hard to see density of data at bottom of graph
 
 # Frequency polygons
 # Using a tidy dataset
@@ -193,14 +216,18 @@ Nutrientplot6 <-
   geom_freqpoly(aes(x = no23), color = "royalblue") +
   geom_freqpoly(aes(x = po4), color = "red") 
 print(Nutrientplot6)
+# specifying x axis and color
+# doesn't have a legend or specify be/w nutrients
+# not a good way to do this
 
 # Using a gathered dataset
 Nutrientplot7 <-   
   ggplot(PeterPaul.chem.nutrients.gathered) +
   geom_freqpoly(aes(x = concentration, color = nutrient))
 print(Nutrientplot7)
+# now w/ gathering data, much easier to plot data
 
-# Frequency polygons have the risk of becoming spaghetti plots. 
+# Frequency polygons have the risk of becoming spaghetti plots. Or having too many messy lines
 # See <https://www.data-to-viz.com/caveat/spaghetti.html> for more info.
 
 # Ridgeline plot
@@ -208,6 +235,6 @@ Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(y = nutrient, x = concentration)) +
   geom_density_ridges(aes(fill = lakename), alpha = 0.5) #
 print(Nutrientplot6)
-
+# showing frequency of nutrients by lakes
 
 ```
