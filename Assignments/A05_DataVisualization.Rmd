@@ -1,6 +1,6 @@
 ---
-title: "Assignment 5: Data Visualization"
-author: "Student Name"
+title: "EmmaBeyer_A05_DataVisualization.Rmd"
+author: "Emma Beyer"
 date: "Fall 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -32,6 +32,11 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 
 ```{r initialize project}
 #1 
+# loading packages
+library(tidyverse); library(lubridate); library(here); library(cowplot)
+# checking working directory
+here()
+# reading data
 
 #2 
 
