@@ -33,12 +33,27 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 ```{r initialize project}
 #1 
 # loading packages
-library(tidyverse); library(lubridate); library(here); library(cowplot)
+library(tidyverse); library(lubridate); library(here); library(cowplot); library(ggthemes)
 # checking working directory
 here()
 # reading data
+PeterPaul.nutrients <- 
+  read.csv(here("Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv"),
+           stringsAsFactors = TRUE)
+PeterPaul.litter <-
+  read.csv(here("Data/Processed_KEY/NEON_NIWO_Litter_mass_trap_Processed.csv"),
+           stringsAsFactors = TRUE)                                              #!!!!!!
 
 #2 
+# check dates
+class(PeterPaul.nutrients$sampledate)
+class(PeterPaul.litter$collectDate)
+# change factors to dates
+PeterPaul.nutrients$sampledate <- ymd(PeterPaul.nutrients$sampledate)
+PeterPaul.litter$collectDate <- ymd(PeterPaul.litter$collectDate)
+# recheck dates
+class(PeterPaul.nutrients$sampledate)
+class(PeterPaul.litter$collectDate)
 
 ```
 ## Define your theme
@@ -51,7 +66,19 @@ here()
 
 ```{r build plot theme}
 #3
+# assigning default theme
+my_theme <- theme_base()  + 
+        # changing background color
+  theme(panel.background =  element_rect(color = 'lightgrey'),
+        # changing legend position
+        legend.position = 'bottom right',
+        # changing axis lines to blue
+        panel.grid.major = element_line(color = "blue"),
+        panel.grid.minor = element_line(color = "blue"))
 
+# setting my_theme as default
+theme_set(my_theme)
+# ask if I need to add this at the end of my code or if auto                    !!!!!!
 ```
 
 ## Create graphs
@@ -61,7 +88,22 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r plot total P vs PO4}
 #4 
-
+tp_po4_plot <- ggplot(filter(PeterPaul.nutrients),
+              # plotting phosphorus by phosphate and plotting lakes with different colors
+              aes(y=tp_ug,
+                  x=po4,
+                  color=lakename)) +
+              # adding line of best fit colored black
+              geom_smooth(method = "lm",
+                          color="black") +
+              # changing the limits
+              xlim(0, 250) +
+              ylim(0, 20) +
+              # adding default theme
+              my_theme()
+print(tp_po4_plot)
+# need to change the limits once my data is correct                             !!!!!!
+# need to check to make sure mytheme() works once I figure that out             !!!!!!
 ```
 
 
@@ -73,7 +115,46 @@ Tip:
 
 ```{r Create boxplots}
 #5 
+temp_plot <- ggplot(filter(PeterPaul.nutrients),
+           # plotting temperature by month
+            aes(y=temperature_C,
+                x=factor(month,
+                         levels=1:12,
+                         labels=month.abb))) +
+          # choosing box plot
+          geom_boxplot() +
+          # adding x axis name
+          scale_x_discrete(name="month",
+                           drop=FALSE)
 
+tp_plot <- ggplot(filter(PeterPaul.nutrients),
+           # plotting temperature by month
+            aes(y=tp_ug,
+                x=factor(month,
+                         levels=1:12,
+                         labels=month.abb))) + 
+          # choosing box plot
+          geom_boxplot() +
+          # adding x axis name
+          scale_x_discrete(name="month",
+                           drop=FALSE)
+
+tn_plot <- ggplot(filter(PeterPaul.nutrients),
+           # plotting temperature by month
+            aes(y=tn_ug,
+                x=factor(month,
+                         levels=1:12,
+                         labels=month.abb))) + 
+          # choosing box plot
+          geom_boxplot() +
+          # adding x axis name
+          scale_x_discrete(name="month",
+                           drop=FALSE)
+
+# adding above graphs to one plot
+plot_grid(temp_plot, tp_plot, tn_plot, nrow = 2, align = 'h', rel_heights = c(1.25, 1))
+
+  
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
@@ -86,12 +167,32 @@ Question: What do you observe about the variables of interest over seasons and b
 
 ```{r Plot litter}
 #6
-
+# displaying only Needles subset
+needles_plot <- ggplot(filter(PeterPaul.litter, functionalGroup=="Needles"),
+                     # plotting dry mass of needles by date and coloring nlcdClass
+                     aes(y=dryMass,
+                         x=collectDate,
+                         color=nlcdClass))
+                        # choosing violin plot
+                        geom_violin() +
+                        # changing the name of the legend
+                        labs(color = "NLCD Class")
+print(needles_plot)
+# ask is there a way to fill the violins                                        !!!!!!
 
 #7
-
+# displaying only Needles subset
+needles_plot_facet <- ggplot(filter(PeterPaul.litter, functionalGroup=="Needles"),
+                          # plotting dry mass of needles by date and coloring nlcdType
+                          aes(y=dryMass,
+                              x=collectDate,)) +
+                          # choosing violin plot
+                          geom_violin() +
+                          # separate NLCD classes into 3 facets
+                          facet_wrap(vars(nlcdClass), nrow = 3, )
+print(needles_plot_facet)
 
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:
+> Answer: It's easier to compare the NLCD Classes in 6, since they are next to each other on the same plot. Separated the graph gets squished and it's harder to see the differences between them.
