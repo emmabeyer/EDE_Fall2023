@@ -42,7 +42,7 @@ PeterPaul.nutrients <-
            stringsAsFactors = TRUE)
 PeterPaul.litter <-
   read.csv(here("Data/Processed_KEY/NEON_NIWO_Litter_mass_trap_Processed.csv"),
-           stringsAsFactors = TRUE)                                              #!!!!!!
+           stringsAsFactors = TRUE)                                              
 
 #2 
 # check dates
@@ -69,16 +69,16 @@ class(PeterPaul.litter$collectDate)
 # assigning default theme
 my_theme <- theme_base()  + 
         # changing background color
-  theme(panel.background =  element_rect(color = 'lightgrey'),
+  theme(plot.background =  element_rect(color = 'grey'),
         # changing legend position
-        legend.position = 'bottom right',
+        legend.position = 'right',
         # changing axis lines to blue
         panel.grid.major = element_line(color = "blue"),
         panel.grid.minor = element_line(color = "blue"))
-
+        
 # setting my_theme as default
 theme_set(my_theme)
-# ask if I need to add this at the end of my code or if auto                    !!!!!!
+
 ```
 
 ## Create graphs
@@ -93,17 +93,19 @@ tp_po4_plot <- ggplot(filter(PeterPaul.nutrients),
               aes(y=tp_ug,
                   x=po4,
                   color=lakename)) +
+              # change x axis label
+              xlab("Total Phosphorous") +
+              # change y axis label
+              ylab("Total Phosphate") +
               # adding line of best fit colored black
               geom_smooth(method = "lm",
                           color="black") +
+              geom_boxplot() +
               # changing the limits
-              xlim(0, 250) +
-              ylim(0, 20) +
-              # adding default theme
-              my_theme()
+              xlim(0, 45) +
+              ylim(0, 150) 
+              
 print(tp_po4_plot)
-# need to change the limits once my data is correct                             !!!!!!
-# need to check to make sure mytheme() works once I figure that out             !!!!!!
 ```
 
 
@@ -113,14 +115,19 @@ Tip:
 * Recall the discussion on factors in the previous section as it may be helpful here. 
 * R has a built-in variable called `month.abb` that returns a list of months;see <https://r-lang.com/month-abb-in-r-with-example>
 
-```{r Create boxplots}
+```{r Create boxplots, fig.height=8}
 #5 
 temp_plot <- ggplot(filter(PeterPaul.nutrients),
            # plotting temperature by month
             aes(y=temperature_C,
                 x=factor(month,
                          levels=1:12,
-                         labels=month.abb))) +
+                         labels=month.abb),
+                color=lakename)) +
+          # change x axis label
+          xlab("Month") +
+          # change y axis label
+          ylab("Temperature (C)") +
           # choosing box plot
           geom_boxplot() +
           # adding x axis name
@@ -132,7 +139,12 @@ tp_plot <- ggplot(filter(PeterPaul.nutrients),
             aes(y=tp_ug,
                 x=factor(month,
                          levels=1:12,
-                         labels=month.abb))) + 
+                         labels=month.abb),
+                color=lakename)) + 
+          # change x axis label
+          xlab("Month") +
+          # change y axis label
+          ylab("Total Phosphorous") +
           # choosing box plot
           geom_boxplot() +
           # adding x axis name
@@ -144,7 +156,12 @@ tn_plot <- ggplot(filter(PeterPaul.nutrients),
             aes(y=tn_ug,
                 x=factor(month,
                          levels=1:12,
-                         labels=month.abb))) + 
+                         labels=month.abb),
+                color=lakename)) + 
+          # change x axis label
+          xlab("Month") +
+          # change y axis label
+          ylab("Total Nitrogen") +
           # choosing box plot
           geom_boxplot() +
           # adding x axis name
@@ -152,14 +169,20 @@ tn_plot <- ggplot(filter(PeterPaul.nutrients),
                            drop=FALSE)
 
 # adding above graphs to one plot
-plot_grid(temp_plot, tp_plot, tn_plot, nrow = 2, align = 'h', rel_heights = c(1.25, 1))
+plot_grid(temp_plot + theme(legend.position = "none"),
+          tp_plot + theme(legend.position = "none"),
+          tn_plot + theme(legend.position = "bottom"),
+          nrow = 3,
+          align = 'h',
+          rel_heights = c(1.5, 1.5, 2)) +
+  theme(axis.text = element_text(size = 10))
 
   
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: Summer was the ideal time to take nutrient samples, whereas there was no data for the other seasons. The nitrogen and temperatures are relativly the same across the two lakes, but there is a slight difference in phosphorous levels between the lakes. 
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
@@ -172,13 +195,12 @@ needles_plot <- ggplot(filter(PeterPaul.litter, functionalGroup=="Needles"),
                      # plotting dry mass of needles by date and coloring nlcdClass
                      aes(y=dryMass,
                          x=collectDate,
-                         color=nlcdClass))
+                         color=nlcdClass)) +
                         # choosing violin plot
                         geom_violin() +
                         # changing the name of the legend
                         labs(color = "NLCD Class")
 print(needles_plot)
-# ask is there a way to fill the violins                                        !!!!!!
 
 #7
 # displaying only Needles subset
