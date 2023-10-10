@@ -1,6 +1,6 @@
 ---
-title: 'A06 - Crafting Reports'
-author: "Student Name" 
+title: 'EmmaBeyer_A06_CraftingReports.Rmd'
+author: "Emma Beyer" 
 date: "Fall 2023"
 output: pdf_document
 ---
