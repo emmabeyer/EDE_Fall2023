@@ -161,3 +161,4 @@ Add a table of contents to your document and knit to a PDF. Submit your PDF to S
 
 ## Git Repository
 
+[GitRepositoryLink](https://github.com/emmabeyer/EDE_Fall2023)
