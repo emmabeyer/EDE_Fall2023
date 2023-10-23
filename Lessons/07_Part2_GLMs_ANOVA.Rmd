@@ -112,7 +112,7 @@ print(Litter.Totals.plot)
 
 What information does the output give us? How might we report this information in a report?
 
-> 
+> We would want to reorder the sites to match the abcd format. 
 
 ## TWO-WAY ANOVA
 
