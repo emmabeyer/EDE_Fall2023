@@ -73,11 +73,13 @@ Important components of the linear regression are the correlation and the R-squa
 For the NTL-LTER dataset, can we predict irradiance (light level) from depth?
 
 ```{r}
+# lm stands for linear model
 irradiance.regression <- 
   lm(PeterPaul.chem.nutrients$irradianceWater ~ 
        PeterPaul.chem.nutrients$depth)
 
 # another way to format the lm() function
+# this is the prefered way, especailly w/ mutliple
 irradiance.regression <- lm(
   data = PeterPaul.chem.nutrients,
   irradianceWater ~ depth)
@@ -88,7 +90,7 @@ cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$dept
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
->  
+>  Significant negative correlation between irradance and depth
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -103,6 +105,7 @@ An exploratory option to visualize the model fit is to use the function `plot`. 
 4. **Residuals vs. Leverage.** This graph will display potential outliers. The values that fall outside the dashed red lines (Cook's distance) are outliers for the model. Watch for drastic departures of the solid red line from horizontal - this is a sign of a poor model fit.
 
 ```{r, fig.height = 3, fig.width = 4}
+# this is just dividing the plot screen into 4 sections in 2 by 2 cells
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(irradiance.regression)
 par(mfrow = c(1,1))
@@ -122,11 +125,13 @@ print(irradiancebydepth)
 Given the distribution of irradiance values, we don't have a linear relationship between x and y in this case. Let's try log-transforming the irradiance values. Note we also removing the observations that seems to ba an outlier.
 
 ```{r, fig.height = 3, fig.width = 4}
+# filtering the data set by taking out 0s and outliers
 PeterPaul.chem.nutrients <- filter(PeterPaul.chem.nutrients, 
                                    irradianceWater != 0 & irradianceWater < 5000)
 irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth)
 summary(irradiance.regression2)
 
+# plots are much better now that outliers are gone
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(irradiance.regression2)
 par(mfrow = c(1,1))
@@ -169,6 +174,7 @@ par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(TPregression)
 par(mfrow = c(1,1))
 
+#see that this is not a good example data set
 ```
 
 ## Correlation Plots
@@ -182,8 +188,11 @@ PeterPaulnutrients <-
   select(tn_ug:po4) %>%
   na.omit()
 PeterPaulCorr <- cor(PeterPaulnutrients)
+# shows the whole plot
 corrplot(PeterPaulCorr, method = "ellipse")
+# shows the upper plot, to highlight correlation
 corrplot.mixed(PeterPaulCorr, upper = "ellipse")
+# good for finding more variables to include in your regression
 ```
 
 ## AIC to select variables
@@ -201,8 +210,9 @@ TPAIC <- lm(data = Paul.naomit, tp_ug ~ depth + dissolvedOxygen +
               temperature_C + tn_ug + po4)
 
 #Choose a model by AIC in a Stepwise Algorithm
+# use this to find the best fit
 step(TPAIC)
 TPmodel <- lm(data = Paul.naomit, tp_ug ~ dissolvedOxygen + temperature_C + tn_ug)
 summary(TPmodel)
-
+# in this case the adjustments didn't work. It's just the data set, process is correct
 ```
