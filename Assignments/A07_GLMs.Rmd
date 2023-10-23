@@ -1,6 +1,6 @@
 ---
-title: "Assignment 7: GLMs (Linear Regressios, ANOVA, & t-tests)"
-author: "Student Name"
+title: "EmmaBeyer_A07_GLM.Rmd"
+author: "Emma Beyer"
 date: "Fall 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -27,7 +27,15 @@ This exercise accompanies the lessons in Environmental Data Analytics on general
 
 ```{r setup2}
 #1
+library(tidyverse)
+library(agricolae)  
+library(here)
+here()
 
+ChemPhys <- read.csv(here("Data/RAW/NTL-LTER_Lake_ChemistryPhysics_Raw.csv"), stringsAsFactors = TRUE)
+
+# Set date to date format
+Litter$collectDate <- as.Date(ChemPhys$collectDate , format = "%Y-%m-%d")
 
 #2
 
