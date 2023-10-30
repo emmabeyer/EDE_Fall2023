@@ -1,6 +1,6 @@
 ---
-title: "Assignment 8: Time Series Analysis"
-author: "Student Name"
+title: "EmmaBeyer_A08_TimeSeries.Rmd"
+author: "Emma Beyer"
 date: "Fall 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -27,7 +27,23 @@ This exercise accompanies the lessons in Environmental Data Analytics on general
 * Set your ggplot theme
 
 ```{r}
+# loading packages
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(zoo)
+library(here)
 
+# check WD
+here()
+
+# create my theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "darkgreen"), 
+        title = element_text(color='darkblue'),
+        legend.position = "right")
+# set theme
+theme_set(mytheme)
 ```
 
 
