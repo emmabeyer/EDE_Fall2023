@@ -23,10 +23,10 @@ library(tidyverse)
 library(lubridate)
 #install.packages("trend")
 library(trend)
-install.packages("zoo")
-#library(zoo)
-install.packages("Kendall")
-#library(Kendall)
+#install.packages("zoo")
+library(zoo)
+#install.packages("Kendall")
+library(Kendall)
 #install.packages("tseries")
 library(tseries)
 
@@ -121,6 +121,7 @@ EnoDischarge.late_ts <- ts(EnoDischarge.late$discharge.mean, start = c(1985,1), 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
 
 ```{r}
+# use to look at the arrangements, x and s.window are what we will use
 ?stl
 # Generate the decomposition
 EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
@@ -137,14 +138,18 @@ EnoDischarge.late_Components <- mutate(EnoDischarge.late_Components,
 
 # Visualize how the trend maps onto the data
 ggplot(EnoDischarge.late_Components) +
+  # observed line
   geom_line(aes(y = Observed, x = Date),  size = 0.25) +
+  # trend line
   geom_line(aes(y = trend, x = Date), color = "#c13d75ff") +
+  # y intercept line
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
 
 # Visualize how the seasonal cycle maps onto the data
 ggplot(EnoDischarge.late_Components) +
   geom_line(aes(y = Observed, x = Date),  size = 0.25) +
+  # seasonal line
   geom_line(aes(y = seasonal, x = Date), color = "#c13d75ff") +
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
@@ -219,23 +224,25 @@ Note that wind speed has a seasonal cycle. We might be interested in knowing how
 ```{r}
 
 # Generate time series (trend test needs ts, not data.frame)
+# another way to call the time series variables
+# defining first month
 f_month <- month(first(wind_data_clean$DATE))
+# defining first year
 f_year <- year(first(wind_data_clean$DATE))
 wind_data_ts <- ts(wind_data_clean$AWND.clean,
                    start=c(f_year,f_month),
                    frequency=12) 
 
-#decompose
+#decomposition function
 wind_data_decomp <- stl(wind_data_ts,s.window = "periodic")
 plot(wind_data_decomp)
+# see that this is a seasonal dataset
 
 # Run SMK test
 wind_data_trend1 <- Kendall::SeasonalMannKendall(wind_data_ts)
 
 # Inspect results
 wind_data_trend1
-summary(wind_data_trend1)
-
 
 wind_data_trend2 <- trend::smk.test(wind_data_ts)
 # Inspect results
@@ -250,12 +257,12 @@ ggplot(wind_data, aes(x = DATE, y = AWND)) +
   ylab("Average Wind Speed") +
   geom_smooth( method = lm )
 print(wind_data_plot)
-
+# shows a decreasing trend
 ```
 
 What would we conclude based on these findings? 
 
-> Answer:
+> Answer:There is a deacresing trend over time in wind speed.
 
 
 ## Forecasting with Autoregressive and Moving Average Models (ARMA)
