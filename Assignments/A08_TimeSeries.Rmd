@@ -29,6 +29,7 @@ This exercise accompanies the lessons in Environmental Data Analytics on general
 ```{r}
 # loading packages
 library(tidyverse)
+library(dplyr)
 library(lubridate)
 library(trend)
 library(zoo)
@@ -50,7 +51,39 @@ theme_set(mytheme)
 2. Import the ten datasets from the Ozone_TimeSeries folder in the Raw data folder. These contain ozone concentrations at Garinger High School in North Carolina from 2010-2019 (the EPA air database only allows downloads for one year at a time). Import these either individually or in bulk and then combine them into a single dataframe named `GaringerOzone` of 3589 observation and 20 variables. 
 
 ```{r, message = FALSE}
-#1
+#2
+garinger_2010 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2010_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2011 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2011_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2012 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2012_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2013 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2013_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2014 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2014_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2015 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2015_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2016 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2016_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2017 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2017_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2018 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2018_raw.csv"), 
+           stringsAsFactors = TRUE)
+garinger_2019 <- 
+  read.csv(here("Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2019_raw.csv"), 
+           stringsAsFactors = TRUE)
+
+GaringerOzone <- bind_rows(garinger_2010, garinger_2011, garinger_2012, garinger_2013, garinger_2014, garinger_2015, garinger_2016, garinger_2017, garinger_2018, garinger_2019)
 
 ```
 
@@ -66,12 +99,17 @@ theme_set(mytheme)
 
 ```{r}
 # 3
-
+  GaringerOzone$Date <- mdy(GaringerOzone$Date)
 # 4
-
-# 5
-
-# 6
+GaringerOzone_processed <-
+  GaringerOzone %>% 
+  select(Date,Daily.Max.8.hour.Ozone.Concentration,DAILY_AQI_VALUE)
+# 5 - Not sure how to use as seq function or understand which column you want me to change
+Days <-
+  GaringerOzone_processed %>% 
+  filter(as.date.frame(seq())) %>%
+  rename(new_column_name = old_column_name)
+# 6 - Not sure how to use left_join
 
 
 ```
@@ -82,7 +120,12 @@ theme_set(mytheme)
 
 ```{r}
 #7
-
+ozone_plot <- 
+ggplot(GaringerOzone, aes(x = Date, y = Daily.Max.8.hour.Ozone.Concentration)) +
+  geom_line() +
+  geom_smooth(methods="lm") +
+  labs(x = "Date", y = expression("O3 Concentrations (ppm)"))
+print(ozone_plot)
 ```
 
 >Answer:
