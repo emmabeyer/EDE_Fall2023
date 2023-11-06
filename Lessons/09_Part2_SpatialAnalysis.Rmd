@@ -77,6 +77,8 @@ st_crs(epa_pm25_sites_sf)$epsg
 #Plot the data
 ggplot(data=epa_pm25_sites_sf) +
   geom_sf()
+# sf = spatial feature or spatial dataframe
+# spatial features need: coordinate system, geometries, and attributes
 ```
 
 ## 2.2 Reading shapefiles into R with `sf`
@@ -88,18 +90,18 @@ The `sf` package allows us to read many existing data formats, including ArcGIS 
 Below we read in the USA counties shapefile, filtering for just the NC features (NC has a state FIPS code of "37"...). We also see that `sf` plays nice with "tidyverse" syntax (e.g. pipes) and functions (e.g. filter). The `sf` package also includes some new spatial methods for exploring our data (e.g. `st_bbox` which draws a bounding box around all spatial features).
 
 ```{r read.filtered.records.from.shapefile.to.sf.object}
-#
+# st_read instead of read.csv
 counties_sf<- st_read(here('Data/Spatial/cb_2018_us_county_20m.shp')) %>% 
   filter(STATEFP == 37) #Filter for just NC Counties
 
-#
+# column names
 colnames(counties_sf)
 
-#
+# column deatails
 st_crs(counties_sf) 
 
 
-#
+# number of rows, 100
 nrow(counties_sf)
 
 #Reveal the extent of this dataset via the st_bbox() function
@@ -118,10 +120,11 @@ mapView(counties_sf, zcol = "AWATER")
 
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
+huc8_sf <- st_read(here('Data/Spatial/NCHUC8.shp')) 
 
 
 #Reveal the columns
-
+st_bbox(huc8_sf)
 
 #Check the CRS
 
@@ -130,6 +133,7 @@ mapView(counties_sf, zcol = "AWATER")
 head(huc8_sf)
 
 #View the data as a map, colored by the acreage in each
+mapView(huc8_sf, zcol = "ACRES")
 
 
 
@@ -169,6 +173,7 @@ If you have difficulty, the link you want is: - <https://services1.arcgis.com/Hp
 This a link to a spatial dataset in GeoJSON format. Now let's read this dataset in and explore it:
 
 ```{r load.geojson.data}
+# same foramat as shapefile
 powerplants_sf <- st_read('https://opendata.arcgis.com/datasets/ee0263bd105d41599be22d46107341c3_0.geojson')
 
 #Reveal the field names
@@ -187,6 +192,7 @@ nc_powerplants_sf <- powerplants_sf %>%
 #Have a look the variety of types (and number of each)
 nc_powerplants_sf %>% 
   st_drop_geometry() %>% 
+  # counts the number of types
   count(TYPE, sort=TRUE)
 
 #Most are solar farms; let's remove those
@@ -224,6 +230,7 @@ svi2018_nc_raw <- read.csv(
 str(svi2018_nc_raw)
 
 #Join the SVI attributes to the county spatial features
+# ask about FIPS
 counties_sf_join <-  merge(x = counties_sf,
                            y = svi2018_nc_raw, 
                            by.x = "GEOID", 
@@ -264,6 +271,12 @@ huc8_sf_join = merge(x = huc8_sf,
                      by.x = 'HUC_8',
                      by.y = 'HUC_8')
 
+# use tidyverse to join HUC_8 features
+# another example of using tidyverse
+#huc8_sf_wind <- huc8_sf %>%
+  #group_by(HUC_8) %>%
+  #summarize(Kwhkm2day = sum(kwhkm2day))
+
 #View the outputs
 ggplot(data=huc8_sf_join) +
   geom_sf(aes(fill=SumWindEnergy)) +
@@ -293,6 +306,7 @@ mapview(state_sf)
 *Now you try*: Aggregate the HUC_8 data on the `DWQ_Basin` attribute, computing the sum of the `ACRES` and `SQ_MILES` field and view the result.
 
 ```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
+# Will go over this is lab
 #List the unique values in the DWQ_Basin field
 
 
@@ -381,16 +395,20 @@ mapview(neuse_counties_sf, zcol='Area_m2')
 
 ```{r EXERCISE: Clipping}
 #Select the Triangle County from the 
-
+the_triangle <- counties_sf_utm %>%
+  filter(NAME %in% c("Chathan", "Durham", "Orange", "Wake"))
 
   
 #Grab the intersecting HUC_8s
+the_hucs <- huc8_sf_utm{the_triangle}
 
-
+mapview(the_hucs) + mapview(the_triangle, alpha.regions = 0, color = 'red')
 
 #Intersect the HUC_8s
+the_huc_clip <- huc2_utm %>%
+  st_intersection(the_triangle)
 
-
+mapview(the_huc_clip) + mapview(the_triangle, alpha.regions = 0, color = 'red')
 
 ```
 
@@ -426,6 +444,7 @@ myMap <- myMap + geom_sf(data = triCo_in2km, color = 'green', fill=NA)
 myMap
 
 #Combine the centroids into one feature and construct a convex hull around them
+# used to calculate distances
 triCo_centroids_chull <- triCo_centroids %>% 
   st_union() %>% 
   st_convex_hull()
@@ -446,7 +465,7 @@ myMap
 We can also use location to select features.
 
 ```{r Select the county in which user provided lat/long pair is found}
-#User coordinates
+#User specified coordinates
 userLat = 36.0045442
 userLng = -78.9426381
 
@@ -498,7 +517,7 @@ ggplot()  +
   geom_sf(data = state_sf_utm, color='red',size=2) + 
   scale_fill_gradient(low="yellow", high="darkgreen")
 
-#Right order
+#Right order, check what will cover what
 ggplot() +
   geom_sf(data = state_sf_utm, color='red',size=2) +
   geom_sf(data = counties_sf_utm, aes(fill = ALAND), color = 'white')  +
@@ -513,7 +532,7 @@ Leaflet is the most powerful of the three. However it requires getting all our d
 ### 4.2.1 Multiple layers in Leaflet
 
 ```{r transform.data.back.to.WSG84}
-# Convert all to WGS84 (crs=4326)
+# Convert all to WGS84 (crs=4326), be/c this is the leaflet base layer
 EPAair_wgs84 <- st_transform(epa_pm25_sites_sf, c=4326)
 counties_WGS84 <- st_transform(counties_sf_utm, c=4326)
 state_WGS84 <- st_transform(state_sf,c=4326)

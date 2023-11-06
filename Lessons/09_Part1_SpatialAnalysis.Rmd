@@ -84,9 +84,11 @@ names(GasPlants)
 str(GasPlants$geometry)
 
 #View using sf plot
+# Quick and ready plot
 plot(GasPlants['status'],pch=16)
 
 #View using ggplot
+# points in geographic space
 ggplot(data=GasPlants) + geom_sf()
 
 #View using mapview
@@ -107,7 +109,8 @@ EPAair <- read.csv(here("Data/Processed_KEY/EPAair_O3_PM25_NC1819_Processed.csv"
 EPAair.sites <- EPAair %>% 
   group_by(Site.Name, COUNTY, mean_Lat, mean_Lng) %>% 
   summarize(
-    mean_Ozone = mean(Ozone, na.rm=T),    #What does "na.rm=T" do? Is it necessary?
+    mean_Ozone = mean(Ozone, na.rm=T),    
+    # What does "na.rm=T" do? Is it necessary?
     mean_PM25 = mean(PM2.5, na.rm=T),
     count_all = n(),
     count_Ozone = sum(!is.na(Ozone)),
@@ -117,7 +120,7 @@ EPAair.sites <- EPAair %>%
 EPAair.sf <- EPAair.sites %>% 
   st_as_sf(coords = c('mean_Lng','mean_Lat'),
            crs=4326)
-
+# lat and long columns are combined into one geospatial column
 #View the data using the methods above...
 
 ```
@@ -126,18 +129,22 @@ EPAair.sf <- EPAair.sites %>%
 
 ```{r Create a spatial dataframe from scratch}
 #First create a simple feature geometry object ("sfg")
+# simple feature point
 sfg_GraingerHall <- st_point(c(-78.9427,36.00465))
 class(sfg_GraingerHall)
+# doesn't known where it in map it should go
 mapview(sfg_GraingerHall)
 
 #Upgrade to a simple feature geometry column by adding a crs 
 sfc_GraingerHall <- st_sfc(sfg_GraingerHall,crs=4326)
 class(sfc_GraingerHall)
+# now puts it into map be/c of assigned coordinate system
 mapview(sfc_GraingerHall)
 
 #Upgrade to a spatial dataframe
 sf_GraingerHall <- st_as_sf(sfc_GraingerHall)
 sf_GraingerHall$Name = 'Grainger Hall'
+# can now click on point and see attributes in map
 mapview(sf_GraingerHall)
 
 ```
@@ -156,6 +163,7 @@ Let's explore:
 "Buffering" a simple feature extends the area outward a specified distance. The code below buffers Grainger Hall 1 "unit". 
 ```{r buffer Grainger hall}
 #Buffer Grainger Hall 1 unit
+# 1 refers to 1 degree latitude
 the_buffer <- sf_GraingerHall %>% st_buffer(1)
 
 #View the result
@@ -224,10 +232,13 @@ Say we want to the distance between our EPA sites and the nearest Gas Plant. We 
 
 ```{r Transform the dataset}
 #Transform the datasets to use UTM 17 N, WGS84
+# projecting the data to 32617
+# st_transform reprojects data into specified coordinate system
 EPAair.sf.utm <- st_transform(EPAair.sf,32617)
 GasPlants.utm <- st_transform(GasPlants,32617)
 
 #Have a look at the coordinate associated with the geometries
+# lat/long in meters (found this on website in metadata)
 EPAair.sf.utm$geometry[1]
 
 #Plot the data
@@ -239,6 +250,7 @@ ggplot() +
 distance_matrix <- st_distance(EPAair.sf.utm, GasPlants.utm, pairwise=T)
 
 #Compute the mean of each row (each EPA site)
+# reduce data to just the means
 mean_distances <-  rowMeans(distance_matrix)
 
 #Add as a column to the epa sites
